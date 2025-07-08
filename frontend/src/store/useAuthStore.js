@@ -10,6 +10,7 @@ export const useAuthStore = create((set, get) => ({
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
+  isUpdatingProfileName: false,
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
@@ -102,4 +103,20 @@ export const useAuthStore = create((set, get) => ({
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
   },
+
+  updateProfileName: async (data) => {
+     set({ isUpdatingProfileName : true });
+    try {
+      console.log("request come in useAuthstore")
+      const res = await axiosInstance.put("/auth/update-profileName", data);
+      set({ authUser : res.data });
+      toast.success("Profile Name updated successfully");
+    } catch (error) {
+      console.log("error in update profile:", error);
+     toast.error(error?.response?.data?.message || "some went wrong in update profile");
+    } finally {
+      set({ isUpdatingProfileName : false });
+    }
+  },
+
 }));

@@ -116,3 +116,26 @@ export const checkAuth = (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const updateProfileName = async (req, res) => {
+  try {
+    console.log("Update profile request coming");
+    const { profileName } = req.body;
+    const userId = req.user._id;
+
+    if (!profileName) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { fullName: profileName },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("Error in profile update", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

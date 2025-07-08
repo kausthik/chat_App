@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Mail, User } from "lucide-react";
+import { Camera, Mail, User,Pencil,Loader } from "lucide-react";
 
 const ProfilePage = () => {
-  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  const { authUser, isUpdatingProfile, updateProfile, updateProfileName , isUpdatingProfileName } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [isNameChanging , setNameChanging] = useState(false)
+  const updatedName = useRef("")
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -18,8 +20,22 @@ const ProfilePage = () => {
       const base64Image = reader.result;
       setSelectedImg(base64Image);
       await updateProfile({ profilePic: base64Image });
-    };
-  };
+  }; 
+};
+
+   const handleUpdateButton = async (e) => {
+  const name = updatedName.current?.value?.trim();
+
+  if (!name) {
+    console.log("Name is empty or invalid");
+    return;
+  }
+
+  await updateProfileName({ profileName: name });
+  updatedName.current.value = "";
+  setNameChanging(false);
+};
+ 
 
   return (
     <div className="h-screen pt-20">
@@ -71,11 +87,29 @@ const ProfilePage = () => {
                 <User className="w-4 h-4" />
                 Full Name
               </div>
-              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.fullName}</p>
-            </div>
+            
+            {
+              (!isNameChanging)?
+              <div className="px-4 py-2.5 bg-base-200 rounded-lg border flex justify-between h-11">
+               <p>{authUser?.fullName}</p>
+               <Pencil className="size-4" onClick={()=> setNameChanging(!isNameChanging)}/>
+              </div>
+              :
+                 
+                  (!isUpdatingProfileName)?
+              <div className="px-4 py-2.5 bg-base-200 rounded-lg border flex justify-between h-11">
+               <input ref={updatedName} type="text" placeholder="Enter new name" id="nameField"  className="border-none outline-none bg-transparent shadow-none w-full"/>
+               <button className="font-bold" onClick={handleUpdateButton}>update</button> 
+              </div> :
 
+                   <div className="px-4 py-2.5 bg-base-200 rounded-lg border flex justify-center h-11">
+                     <Loader/>
+                   </div>
+                
+           }
+            </div>
             <div className="space-y-1.5">
-              <div className="text-sm text-zinc-400 flex items-center gap-2">
+              <div className="text-sm text-zinc-400 flex items-center gap-2 h-11">
                 <Mail className="w-4 h-4" />
                 Email Address
               </div>
